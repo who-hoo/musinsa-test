@@ -16,7 +16,7 @@ public class CategoryController {
 
 	@GetMapping
 	public ResponseEntity<CategoriesResponse> categories() {
-		CategoriesResponse categoriesResponse = categoryService.searchAllCategories();
+		CategoriesResponse categoriesResponse = categoryService.searchAllRootCategories();
 		return ResponseEntity.ok(categoriesResponse);
 	}
 }
