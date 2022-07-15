@@ -18,8 +18,8 @@ public class CategoryService {
 	public CategoriesResponse searchAllRootCategories() {
 		//TODO: N+1 개선
 		List<CategoryResponse> categories = categoryRepository.findAllJoinFetch().stream()
+			.filter(c -> c.getParent() == null)
 			.map(CategoryResponse::from)
-			.filter(cr -> !cr.getSubCategories().isEmpty())
 			.collect(Collectors.toList());
 		return CategoriesResponse.from(categories);
 	}

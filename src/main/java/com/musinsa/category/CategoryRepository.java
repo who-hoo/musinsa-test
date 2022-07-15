@@ -7,9 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-	@Query("select c, cr "
+	@Query("select c "
 		+ "from Category c "
-		+ "left join fetch CategoryRelation cr "
-		+ "on c.id = cr.childCategory.id")
+		+ "left join fetch c.parent ")
 	List<Category> findAllJoinFetch();
 }
