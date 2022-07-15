@@ -8,9 +8,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode(exclude={"korName", "engName", "subCategories"})
 @Entity
 public class Category {
 
@@ -26,4 +33,8 @@ public class Category {
 
 	@OneToMany(mappedBy = "parentCategory")
 	private List<CategoryRelation> subCategories = new ArrayList<>();
+
+	public static Category of(Long id, String korName, String engName) {
+		return new Category(id, korName, engName, new ArrayList<>());
+	}
 }
