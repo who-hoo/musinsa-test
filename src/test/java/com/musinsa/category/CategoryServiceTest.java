@@ -1,13 +1,17 @@
 package com.musinsa.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.atLeastOnce;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.verify;
 
 import com.musinsa.category.dto.CategoriesResponse;
+import com.musinsa.category.dto.CategoryResponse;
 import com.musinsa.category.entity.Category;
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,6 +46,38 @@ class CategoryServiceTest {
 		assertThat(actual.getCategories().get(1).getSubCategories().get(1).getSubCategories()).hasSize(2);
 	}
 
+	@Test
+	void 존재하는_카테코리_아이디로_카테고리를_조회하면_해당_아이디를_가진_카테고리와_하위_카테고리의_목록이_반환된다() {
+		//given
+		List<Category> categoryList = createCategoryAndSubCategoriesList();
+		given(categoryRepository.findCategoryAndSubCategoriesByIdJoinFetch(21L))
+			.willReturn(categoryList);
+
+		//when
+		CategoryResponse actual = categoryService.searchCategory(21L);
+
+		//then
+		verify(categoryRepository, atLeastOnce()).findCategoryAndSubCategoriesByIdJoinFetch(21L);
+		assertThat(actual).isNotNull();
+		assertThat(actual.getCategoryId()).isEqualTo(21L);
+		assertThat(actual.getSubCategories()).hasSize(2);
+	}
+
+	@Test
+	void 존재하지_않는_카테코리_아이디로_카테고리를_조회하면_존재하지_않는_카테고리_아이디라는_메시지와_함께_NoSuchElementException이_반환된다() {
+		//given
+		given(categoryRepository.findCategoryAndSubCategoriesByIdJoinFetch(1000L))
+			.willReturn(Collections.emptyList());
+
+		//when
+
+		//then
+		assertThatThrownBy(() -> categoryService.searchCategory(1000L))
+			.isInstanceOf(NoSuchElementException.class)
+			.hasMessage("존재하지 않는 [카테고리 ID]입니다.");
+		verify(categoryRepository, atLeastOnce()).findCategoryAndSubCategoriesByIdJoinFetch(1000L);
+	}
+
 	private List<Category> createAllCategoryList() {
 		Category category1 = Category.of(21L, "책/음악/티켓", "Culture", null);
 		Category category2 = Category.of(22L, "반려동물", "Pet", null);
@@ -59,5 +95,15 @@ class CategoryServiceTest {
 		category6.addSubCategory(category8);
 
 		return List.of(category1, category2, category3, category4, category5, category6, category7, category8);
+	}
+
+	private List<Category> createCategoryAndSubCategoriesList() {
+		Category category = Category.of(21L, "책/음악/티켓", "Culture", null);
+		Category subCategory1 = Category.of(188L, "잡지/무크지", null, category);
+		Category subCategory2 = Category.of(189L, "기타 컬처", null, category);
+		category.addSubCategory(subCategory1);
+		category.addSubCategory(subCategory2);
+
+		return List.of(category, subCategory1, subCategory2);
 	}
 }
