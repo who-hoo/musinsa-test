@@ -2,12 +2,15 @@ package com.musinsa.category.dto;
 
 import com.musinsa.category.entity.Category;
 import javax.validation.constraints.NotBlank;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @ToString
 public class AddCategoryRequest {
 
@@ -20,5 +23,9 @@ public class AddCategoryRequest {
 
 	public Category toEntity() {
 		return Category.of(korName, engName);
+	}
+
+	public static AddCategoryRequest of(String korName, String engName, Long parentCategoryId) {
+		return new AddCategoryRequest(korName, engName, parentCategoryId);
 	}
 }

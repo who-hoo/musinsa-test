@@ -5,13 +5,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.atLeastOnce;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.never;
 
+import com.musinsa.category.dto.AddCategoryRequest;
 import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
 import com.musinsa.category.entity.Category;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +26,7 @@ class CategoryServiceTest {
 
 	@InjectMocks
 	private CategoryService categoryService;
-	
+
 	@Mock
 	private CategoryRepository categoryRepository;
 
@@ -76,6 +79,66 @@ class CategoryServiceTest {
 			.isInstanceOf(NoSuchElementException.class)
 			.hasMessage("존재하지 않는 [카테고리 ID]입니다.");
 		verify(categoryRepository, atLeastOnce()).findCategoryAndSubCategoriesByIdJoinFetch(1000L);
+	}
+
+	@Test
+	void 상위_카테고리_아이디를_지정하지_않고_카테고리를_등록하면_상위_카테고리가_없는_카테고리가_저장되고_저장된_카테고리의_정보가_반환된다() {
+		//given
+		Category newCategory = Category.of(null, "상의", "Top", null);
+		Category savedCategory = Category.of(9L, "상의", "Top", null);
+		given(categoryRepository.save(newCategory))
+			.willReturn(savedCategory);
+		CategoryResponse expected = CategoryResponse.from(savedCategory);
+
+		//when
+		AddCategoryRequest request = AddCategoryRequest.of("상의", "Top", null);
+		CategoryResponse actual = categoryService.save(request);
+
+		//then
+		verify(categoryRepository, never()).findById(request.getParentCategoryId());
+		verify(categoryRepository, atLeastOnce()).save(request.toEntity());
+		assertThat(actual.getCategoryId()).isEqualTo(expected.getCategoryId());
+		assertThat(actual.getParentCategoryId()).isNull();
+	}
+
+	@Test
+	void 존재하는_상위_카테고리_아이디를_지정하고_카테고리를_등록하면_해당하는_상위_카테고리를_가진_카테고리가_저장되고_저장된_카테고리의_정보가_반환된다() {
+		//given
+		Category parentCategory = Category.of(21L, "책/음악/티켓", "Culture", null);
+		Category newCategory = Category.of(null, "개발 서적", "", parentCategory);
+		Category savedCategory = Category.of(9L, "개발 서적", "", parentCategory);
+		given(categoryRepository.findById(21L))
+			.willReturn(Optional.of(parentCategory));
+		given(categoryRepository.save(newCategory))
+			.willReturn(savedCategory);
+		CategoryResponse expected = CategoryResponse.from(savedCategory);
+
+		//when
+		AddCategoryRequest request = AddCategoryRequest.of("개발 서적", "", 21L);
+		CategoryResponse actual = categoryService.save(request);
+
+		//then
+		verify(categoryRepository, atLeastOnce()).findById(request.getParentCategoryId());
+		verify(categoryRepository, atLeastOnce()).save(request.toEntity());
+		assertThat(actual.getCategoryId()).isEqualTo(expected.getCategoryId());
+		assertThat(actual.getParentCategoryId()).isEqualTo(expected.getParentCategoryId());
+	}
+
+	@Test
+	void 존재하지_않는_상위_카테고리_아이디를_지정하고_카테고리를_등록하면_존재하지_않는_상위_카테고리_아이디라는_메시지와_함께_NoSuchElementException이_반환된다() {
+		//given
+		given(categoryRepository.findById(1000L))
+			.willReturn(Optional.empty());
+
+		//when
+		AddCategoryRequest request = AddCategoryRequest.of("개발 서적", "", 1000L);
+
+		//then
+		assertThatThrownBy(() -> categoryService.save(request))
+			.isInstanceOf(NoSuchElementException.class)
+			.hasMessage("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.");
+		verify(categoryRepository, atLeastOnce()).findById(request.getParentCategoryId());
+		verify(categoryRepository, never()).save(request.toEntity());
 	}
 
 	private List<Category> createAllCategoryList() {
