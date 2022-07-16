@@ -42,7 +42,7 @@ public class CategoryService {
 		if(addCategoryRequest.getParentCategoryId() != null) {
 			Category parent = categoryRepository.findById(addCategoryRequest.getParentCategoryId())
 				.orElseThrow(() -> new NoSuchElementException("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다."));
-			newCategory.changeParent(parent);
+			newCategory.updateParent(parent);
 		}
 		return CategoryResponse.from(categoryRepository.save(newCategory));
 	}

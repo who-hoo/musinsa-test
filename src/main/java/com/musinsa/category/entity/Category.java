@@ -42,13 +42,31 @@ public class Category {
 	@OneToMany(mappedBy = "parent")
 	private List<Category> subCategories = new ArrayList<>();
 
-	public void changeParent(Category parent) {
+	public void updateParent(Category parent) {
+		if (this.parent != null) {
+			this.parent.removeSubCategory(this);
+		}
 		parent.addSubCategory(this);
 	}
 
 	public void addSubCategory(Category subCategory) {
 		subCategory.parent = this;
 		this.subCategories.add(subCategory);
+	}
+
+	public void removeSubCategory(Category subCategory) {
+		subCategory.parent = null;
+		this.subCategories.remove(subCategory);
+	}
+
+	public void replaceSubCategories(List<Category> subCategories) {
+		//TODO: 내부 로직 성능 개선(subCategories 한번에 clear 할 수 있도록)
+		while (!this.subCategories.isEmpty()) {
+			this.removeSubCategory(this.subCategories.get(0));
+		}
+		for (Category newSubCategory : subCategories) {
+			this.addSubCategory(newSubCategory);
+		}
 	}
 
 	public static Category of(Long id, String korName, String engName, Category parent) {
