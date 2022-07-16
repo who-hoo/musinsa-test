@@ -4,6 +4,7 @@ import com.musinsa.category.dto.AddCategoryRequest;
 import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
 import java.net.URI;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +36,7 @@ public class CategoryController {
 	}
 
 	@PostMapping
-	public ResponseEntity<CategoryResponse> add(@RequestBody AddCategoryRequest addCategoryRequest) {
-		//TODO: 입력 검증, 예외 처리
+	public ResponseEntity<CategoryResponse> add(@Valid @RequestBody AddCategoryRequest addCategoryRequest) {
 		log.debug("request : {}", addCategoryRequest);
 		CategoryResponse savedCategory = categoryService.save(addCategoryRequest);
 		return ResponseEntity
