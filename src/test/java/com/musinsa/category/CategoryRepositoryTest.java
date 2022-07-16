@@ -16,7 +16,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @AutoConfigureTestDatabase
 class CategoryRepositoryTest {
 
-	@Autowired CategoryRepository categoryRepository;
+	@Autowired
+	CategoryRepository categoryRepository;
 
 	@Test
 	void 전체_카테고리를_조회하면_자신의_하위_카테고리_정보를_포함하는_전체_카테고리가_반환된다() {
@@ -38,5 +39,33 @@ class CategoryRepositoryTest {
 			.isNotNull()
 			.hasSize(8)
 			.contains(category1, category2, category3, category4, category5, category6, category7, category8);
+	}
+
+	@Test
+	void 존재하는_카테코리_아이디로_카테고리를_조회하면_해당_아이디를_가진_카테고리와_하위_카테고리의_목록이_반환된다() {
+		//given
+		Category category = Category.of(21L, "책/음악/티켓", "Culture", null);
+		Category subCategory1 = Category.of(188L, "잡지/무크지", null, category);
+		Category subCategory2 = Category.of(189L, "기타 컬처", null, category);
+
+		//when
+		List<Category> actual = categoryRepository.findCategoryAndSubCategoriesByIdJoinFetch(21L);
+
+		//then
+		assertThat(actual)
+			.isNotNull()
+			.hasSize(3)
+			.contains(category, subCategory1, subCategory2);
+	}
+
+	@Test
+	void 존재하지_않는_카테코리_아이디로_카테고리를_조회하면_빈_리스트가_반환된다() {
+		//given
+
+		//when
+		List<Category> actual = categoryRepository.findCategoryAndSubCategoriesByIdJoinFetch(1000L);
+
+		//then
+		assertThat(actual).isEmpty();
 	}
 }
