@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import com.musinsa.category.dto.AddCategoryRequest;
 import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
+import com.musinsa.category.dto.UpdateCategoryRequest;
 import com.musinsa.category.entity.Category;
 import java.util.Collections;
 import java.util.List;
@@ -139,6 +140,82 @@ class CategoryServiceTest {
 			.hasMessage("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.");
 		verify(categoryRepository, atLeastOnce()).findById(request.getParentCategoryId());
 		verify(categoryRepository, never()).save(request.toEntity());
+	}
+
+	@Test
+	void 존재하지_않는_카테고리를_수정하면_존재하지_않는_카테고리_아이디라는_메시지와_함께_NoSuchElementException이_반환된다() {
+		//given
+		given(categoryRepository.findById(1000L))
+			.willReturn(Optional.empty());
+
+		//when
+		UpdateCategoryRequest request =
+			UpdateCategoryRequest.of("문화", "Culture", null, List.of(188L));
+
+		//then
+		assertThatThrownBy(() -> categoryService.update(1000L, request))
+			.isInstanceOf(NoSuchElementException.class)
+			.hasMessage("존재하지 않는 [카테고리 ID]입니다.");
+		verify(categoryRepository, atLeastOnce()).findById(1000L);
+		verify(categoryRepository, never()).findById(request.getParentCategoryId());
+		verify(categoryRepository, never()).findAllById(request.getSubCategoryIdList());
+	}
+
+	@Test
+	void 존재하지_않는_상위_카테고리_아이디를_지정하고_카테고리를_수정하면_존재하지_않는_상위_카테고리_아이디라는_메시지와_함께_NoSuchElementException이_반환된다() {
+		//given
+		Category parentCategory = Category.of(21L, "책/음악/티켓", "Culture", null);
+		Category subCategory1 = Category.of(188L, "잡지/무크지", null, parentCategory);
+		Category subCategory2 = Category.of(189L, "기타 컬처", null, parentCategory);
+		parentCategory.addSubCategory(subCategory1);
+		parentCategory.addSubCategory(subCategory2);
+		given(categoryRepository.findById(21L))
+			.willReturn(Optional.of(parentCategory));
+		given(categoryRepository.findById(1000L))
+			.willReturn(Optional.empty());
+
+		//when
+		UpdateCategoryRequest request =
+			UpdateCategoryRequest.of("문화", "Culture", 1000L, List.of(188L));
+
+		//then
+		assertThatThrownBy(() -> categoryService.update(21L, request))
+			.isInstanceOf(NoSuchElementException.class)
+			.hasMessage("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.");
+		verify(categoryRepository, atLeastOnce()).findById(21L);
+		verify(categoryRepository, atLeastOnce()).findById(request.getParentCategoryId());
+		verify(categoryRepository, never()).findAllById(request.getSubCategoryIdList());
+	}
+
+	@Test
+	void 존재하지_않는_서브_카테고리_아이디를_포함한_서브_카테고리_아이디_목록을_지정하고_카테고리를_수정하면_존재하는_서브_카테고리들로만_수정된다() {
+		//given
+		Category parentCategory = Category.of(21L, "책/음악/티켓", "Culture", null);
+		Category subCategory1 = Category.of(188L, "잡지/무크지", null, parentCategory);
+		Category subCategory2 = Category.of(189L, "기타 컬처", null, parentCategory);
+		parentCategory.addSubCategory(subCategory1);
+		parentCategory.addSubCategory(subCategory2);
+		given(categoryRepository.findById(21L))
+			.willReturn(Optional.of(parentCategory));
+		given(categoryRepository.findAllById(List.of(188L, 1000L)))
+			.willReturn(List.of(subCategory1));
+
+		//when
+		UpdateCategoryRequest request =
+			UpdateCategoryRequest.of("문화", null, null, List.of(188L, 1000L));
+		CategoryResponse actual = categoryService.update(21L, request);
+
+		//then
+		verify(categoryRepository, atLeastOnce()).findById(21L);
+		verify(categoryRepository, never()).findById(request.getParentCategoryId());
+		verify(categoryRepository, atLeastOnce()).findAllById(request.getSubCategoryIdList());
+		assertThat(actual.getCategoryId()).isEqualTo(21L);
+		assertThat(actual.getCategoryName()).isEqualTo("문화");
+		assertThat(actual.getCategoryEnglishName()).isNull();
+		assertThat(actual.getSubCategories())
+			.hasSize(1)
+			.contains(CategoryResponse.from(subCategory1))
+			.doesNotContain(CategoryResponse.from(subCategory2));
 	}
 
 	private List<Category> createAllCategoryList() {

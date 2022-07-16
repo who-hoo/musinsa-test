@@ -102,4 +102,39 @@ class CategoryTest {
 		assertThat(prevParentCategory.getSubCategories()).doesNotContain(subCategory);
 		assertThat(newParentCategory.getSubCategories()).contains(subCategory);
 	}
+
+	@Test
+	void update_메서드는_null이나_공백_포함_빈_문자열이_입력되면_수정되지_않는다() {
+		//given
+		Category category = Category.of(22L, "반려동물", "Pet", null);
+
+		//when
+		category.update(" ", "Pet", null, null);
+
+		//then
+		assertThat(category.getKorName()).isNotNull().isEqualTo("반려동물");
+		assertThat(category.getEngName()).isNotBlank().isEqualTo("Pet");
+		assertThat(category.getParent()).isNull();
+		assertThat(category.getSubCategories()).isEmpty();
+	}
+
+	@Test
+	void update_메서드는_null이나_공백_포함_빈_문자열이_아닌_파라미터만_수정한다() {
+		//given
+		Category parentCategory = Category.of(21L, "책/음악/티켓", "Culture", null);
+		Category subCategory = Category.of(189L, "기타 컬처", null, parentCategory);
+		parentCategory.addSubCategory(subCategory);
+		parentCategory.addSubCategory(subCategory);
+
+		//when
+		Category newSubCategory1 = Category.of(190L, "공연 티켓", null, subCategory);
+		Category newSubCategory2 = Category.of(191L, "전시회 티켓", null, subCategory);
+		subCategory.update(null, "etc", null, List.of(newSubCategory1, newSubCategory2));
+
+		//then
+		assertThat(subCategory.getKorName()).isEqualTo("기타 컬처");
+		assertThat(subCategory.getEngName()).isEqualTo("etc");
+		assertThat(subCategory.getParent()).isEqualTo(parentCategory);
+		assertThat(subCategory.getSubCategories()).hasSize(2).contains(newSubCategory1, newSubCategory2);
+	}
 }
