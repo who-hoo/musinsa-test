@@ -42,11 +42,20 @@ public class Category {
 	@OneToMany(mappedBy = "parent")
 	private List<Category> subCategories = new ArrayList<>();
 
-	public void addSubCategory(Category category) {
-		subCategories.add(category);
+	public void changeParent(Category parent) {
+		parent.addSubCategory(this);
+	}
+
+	public void addSubCategory(Category subCategory) {
+		subCategory.parent = this;
+		this.subCategories.add(subCategory);
 	}
 
 	public static Category of(Long id, String korName, String engName, Category parent) {
 		return new Category(id, korName, engName, parent, new ArrayList<>());
+	}
+
+	public static Category of(String korName, String engName) {
+		return new Category(null, korName, engName, null, new ArrayList<>());
 	}
 }

@@ -1,7 +1,9 @@
 package com.musinsa.category;
 
+import com.musinsa.category.dto.AddCategoryRequest;
 import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
+import com.musinsa.category.entity.Category;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -32,5 +34,16 @@ public class CategoryService {
 			.map(CategoryResponse::from)
 			.findAny()
 			.orElseThrow(() -> new NoSuchElementException("존재하지 않는 [카테고리 ID]입니다."));
+	}
+
+	@Transactional
+	public CategoryResponse save(AddCategoryRequest addCategoryRequest) {
+		Category newCategory = addCategoryRequest.toEntity();
+		if(addCategoryRequest.getParentCategoryId() != null) {
+			Category parent = categoryRepository.findById(addCategoryRequest.getParentCategoryId())
+				.orElseThrow(() -> new NoSuchElementException("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다."));
+			newCategory.changeParent(parent);
+		}
+		return CategoryResponse.from(categoryRepository.save(newCategory));
 	}
 }
