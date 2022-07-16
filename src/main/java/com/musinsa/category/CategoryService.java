@@ -73,4 +73,11 @@ public class CategoryService {
 		);
 		return CategoryResponse.from(updatedCategory);
 	}
+
+	@Transactional
+	public void delete(Long id) {
+		Category category = categoryRepository.findById(id)
+			.orElseThrow(() -> new NoSuchElementException("존재하지 않는 [카테고리 ID]입니다."));
+		categoryRepository.delete(category);
+	}
 }
