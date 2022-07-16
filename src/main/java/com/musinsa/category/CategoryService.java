@@ -16,7 +16,6 @@ public class CategoryService {
 
 	@Transactional(readOnly = true)
 	public CategoriesResponse searchAllRootCategories() {
-		//TODO: N+1 개선
 		List<CategoryResponse> categories = categoryRepository.findAllJoinFetch().stream()
 			.filter(c -> c.getParent() == null)
 			.map(CategoryResponse::from)
