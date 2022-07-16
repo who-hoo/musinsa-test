@@ -26,7 +26,7 @@ class CategoryServiceTest {
 	@Test
 	void 전체_루트_카테고리를_조회하면_전체_카테고리_중_depth가_0인_루트_카테고리의_하위_카테고리_정보를_포함하는_목록이_반환된다() {
 		//given
-		List<Category> categoryList = createCategoryList();
+		List<Category> categoryList = createAllCategoryList();
 		given(categoryRepository.findAllJoinFetch())
 			.willReturn(categoryList);
 
@@ -42,7 +42,7 @@ class CategoryServiceTest {
 		assertThat(actual.getCategories().get(1).getSubCategories().get(1).getSubCategories()).hasSize(2);
 	}
 
-	private List<Category> createCategoryList() {
+	private List<Category> createAllCategoryList() {
 		Category category1 = Category.of(21L, "책/음악/티켓", "Culture", null);
 		Category category2 = Category.of(22L, "반려동물", "Pet", null);
 		Category category3 = Category.of(188L, "잡지/무크지", null, category1);
