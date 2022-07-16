@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(NoSuchElementException.class)
-	public ResponseEntity<ErrorResponse> handleCustomException(NoSuchElementException error) {
+	public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException error) {
 		return ResponseEntity.badRequest().body(new ErrorResponse(error.getMessage()));
 	}
 }
