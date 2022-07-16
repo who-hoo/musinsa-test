@@ -69,6 +69,21 @@ public class Category {
 		}
 	}
 
+	public Category update(String korName, String engName, Category parent, List<Category> subCategories) {
+		if (korName != null && !korName.isBlank()) {
+			this.korName = korName;
+		}
+		//TODO: null은 허용하고, 공백이랑 문자만 예외처리?
+		this.engName = engName;
+		if (parent != null) {
+			this.updateParent(parent);
+		}
+		if (subCategories != null) {
+			this.replaceSubCategories(subCategories);
+		}
+		return this;
+	}
+
 	public static Category of(Long id, String korName, String engName, Category parent) {
 		return new Category(id, korName, engName, parent, new ArrayList<>());
 	}
