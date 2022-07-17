@@ -5,6 +5,7 @@ import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
 import com.musinsa.category.dto.UpdateCategoryRequest;
 import com.musinsa.category.entity.Category;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -84,9 +85,12 @@ public class CategoryService {
 
 	@CacheEvict(value = "category", allEntries = true)
 	@Transactional
-	public void delete(Long id) {
+	public void delete(Long id, boolean withSubCategories) {
 		Category category = categoryRepository.findById(id)
 			.orElseThrow(() -> new NoSuchElementException("존재하지 않는 [카테고리 ID]입니다."));
+		if (!withSubCategories) {
+			category.replaceSubCategories(Collections.emptyList());
+		}
 		categoryRepository.delete(category);
 	}
 }

@@ -40,7 +40,7 @@ public class Category {
 	@JoinColumn(name = "parent_category_id")
 	private Category parent;
 
-	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE)
 	private List<Category> subCategories = new ArrayList<>();
 
 	public void updateParent(Category parent) {
