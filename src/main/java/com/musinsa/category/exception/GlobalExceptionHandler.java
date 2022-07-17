@@ -17,6 +17,11 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.badRequest().body(new ErrorResponse(error.getMessage()));
 	}
 
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException error) {
+		return ResponseEntity.badRequest().body(new ErrorResponse(error.getMessage()));
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException error) {
 		BindingResult bindingResult = error.getBindingResult();

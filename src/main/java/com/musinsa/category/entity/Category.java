@@ -74,7 +74,9 @@ public class Category {
 		if (korName != null && !korName.isBlank()) {
 			this.korName = korName;
 		}
-		//TODO: null은 허용하고, 공백이랑 문자만 예외처리?
+		if (engName != null && engName.trim().equals("")) {
+			throw new IllegalArgumentException("카테고리 영어이름(eng_name)은 빈 문자열(공백 불가)을 입력할 수 없습니다.(null 가능)");
+		}
 		this.engName = engName;
 		if (parent != null) {
 			this.updateParent(parent);
