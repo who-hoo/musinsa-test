@@ -31,7 +31,9 @@ public class CacheConfig {
 
 		Cache categoryCache = new Cache(categoryCacheConfiguration);
 
-		Objects.requireNonNull(cacheManagerFactoryBean().getObject()).addCache(categoryCache);
+		if (!Objects.requireNonNull(cacheManagerFactoryBean().getObject()).cacheExists("category")) {
+			Objects.requireNonNull(cacheManagerFactoryBean().getObject()).addCache(categoryCache);
+		}
 
 		return new EhCacheCacheManager(Objects.requireNonNull(cacheManagerFactoryBean().getObject()));
 	}
