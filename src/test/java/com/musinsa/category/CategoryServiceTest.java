@@ -12,6 +12,7 @@ import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
 import com.musinsa.category.dto.UpdateCategoryRequest;
 import com.musinsa.category.entity.Category;
+import com.musinsa.category.exception.ErrorMessage;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -78,7 +79,7 @@ class CategoryServiceTest {
 		//then
 		assertThatThrownBy(() -> categoryService.searchCategory(1000L))
 			.isInstanceOf(NoSuchElementException.class)
-			.hasMessage("존재하지 않는 [카테고리 ID]입니다.");
+			.hasMessage(ErrorMessage.NO_SUCH_CATEGORY_ID);
 		verify(categoryRepository, atLeastOnce()).findCategoryAndSubCategoriesByIdJoinFetch(1000L);
 	}
 
@@ -137,7 +138,7 @@ class CategoryServiceTest {
 		//then
 		assertThatThrownBy(() -> categoryService.save(request))
 			.isInstanceOf(NoSuchElementException.class)
-			.hasMessage("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.");
+			.hasMessage(ErrorMessage.NO_SUCH_PARENT_CATEGORY_ID);
 		verify(categoryRepository, atLeastOnce()).findById(request.getParentCategoryId());
 		verify(categoryRepository, never()).save(request.toEntity());
 	}
@@ -155,7 +156,7 @@ class CategoryServiceTest {
 		//then
 		assertThatThrownBy(() -> categoryService.update(1000L, request))
 			.isInstanceOf(NoSuchElementException.class)
-			.hasMessage("존재하지 않는 [카테고리 ID]입니다.");
+			.hasMessage(ErrorMessage.NO_SUCH_CATEGORY_ID);
 		verify(categoryRepository, atLeastOnce()).findById(1000L);
 		verify(categoryRepository, never()).findById(request.getParentCategoryId());
 		verify(categoryRepository, never()).findAllById(request.getSubCategoryIdList());
@@ -181,7 +182,7 @@ class CategoryServiceTest {
 		//then
 		assertThatThrownBy(() -> categoryService.update(21L, request))
 			.isInstanceOf(NoSuchElementException.class)
-			.hasMessage("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.");
+			.hasMessage(ErrorMessage.NO_SUCH_PARENT_CATEGORY_ID);
 		verify(categoryRepository, atLeastOnce()).findById(21L);
 		verify(categoryRepository, atLeastOnce()).findById(request.getParentCategoryId());
 		verify(categoryRepository, never()).findAllById(request.getSubCategoryIdList());

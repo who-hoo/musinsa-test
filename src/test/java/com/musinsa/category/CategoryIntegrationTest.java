@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.musinsa.category.dto.AddCategoryRequest;
 import com.musinsa.category.dto.UpdateCategoryRequest;
+import com.musinsa.category.exception.ErrorMessage;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,7 @@ class CategoryIntegrationTest {
 		//then
 		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("message", is("카테고리 한글이름(kor_name)은 필수 입력 값(공백 불가)입니다.")));
+			.andExpect(jsonPath("message", is(ErrorMessage.ILLEGAL_CATEGORY_KOR_NAME)));
 	}
 
 	@Test
@@ -92,7 +93,7 @@ class CategoryIntegrationTest {
 		//then
 		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("message", is("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.")));
+			.andExpect(jsonPath("message", is(ErrorMessage.NO_SUCH_PARENT_CATEGORY_ID)));
 	}
 
 	@Test
@@ -132,7 +133,7 @@ class CategoryIntegrationTest {
 		//then
 		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("message", is("존재하지 않는 [카테고리 ID]입니다.")));
+			.andExpect(jsonPath("message", is(ErrorMessage.NO_SUCH_CATEGORY_ID)));
 	}
 
 	@Test
@@ -150,7 +151,7 @@ class CategoryIntegrationTest {
 		//then
 		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("message", is("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다.")));
+			.andExpect(jsonPath("message", is(ErrorMessage.NO_SUCH_PARENT_CATEGORY_ID)));
 	}
 
 	@Test
@@ -179,7 +180,7 @@ class CategoryIntegrationTest {
 		//then
 		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("message", is("존재하지 않는 [카테고리 ID]입니다.")));
+			.andExpect(jsonPath("message", is(ErrorMessage.NO_SUCH_CATEGORY_ID)));
 	}
 
 	@Test
@@ -213,7 +214,7 @@ class CategoryIntegrationTest {
 		//then
 		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("message", is("존재하지 않는 [카테고리 ID]입니다.")));
+			.andExpect(jsonPath("message", is(ErrorMessage.NO_SUCH_CATEGORY_ID)));
 	}
 
 	@Test

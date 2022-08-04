@@ -5,6 +5,7 @@ import com.musinsa.category.dto.CategoriesResponse;
 import com.musinsa.category.dto.CategoryResponse;
 import com.musinsa.category.dto.UpdateCategoryRequest;
 import com.musinsa.category.entity.Category;
+import com.musinsa.category.exception.ErrorMessage;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -41,7 +42,7 @@ public class CategoryService {
 			.filter(c -> Objects.equals(c.getId(), id))
 			.map(CategoryResponse::from)
 			.findAny()
-			.orElseThrow(() -> new NoSuchElementException("존재하지 않는 [카테고리 ID]입니다."));
+			.orElseThrow(() -> new NoSuchElementException(ErrorMessage.NO_SUCH_CATEGORY_ID));
 	}
 
 	@CacheEvict(value = "category", allEntries = true)
@@ -50,7 +51,7 @@ public class CategoryService {
 		Category newCategory = addCategoryRequest.toEntity();
 		if (addCategoryRequest.getParentCategoryId() != null) {
 			Category parent = categoryRepository.findById(addCategoryRequest.getParentCategoryId())
-				.orElseThrow(() -> new NoSuchElementException("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다."));
+				.orElseThrow(() -> new NoSuchElementException(ErrorMessage.NO_SUCH_PARENT_CATEGORY_ID));
 			newCategory.updateParent(parent);
 		}
 		return CategoryResponse.from(categoryRepository.save(newCategory));
@@ -61,12 +62,12 @@ public class CategoryService {
 	public CategoryResponse update(Long id, UpdateCategoryRequest updateCategoryRequest) {
 		//TODO: category, parent, subCategories 조회 후에 이들의 subCategories를 조회하기 위한 N+1 개선
 		Category category = categoryRepository.findById(id)
-			.orElseThrow(() -> new NoSuchElementException("존재하지 않는 [카테고리 ID]입니다."));
+			.orElseThrow(() -> new NoSuchElementException(ErrorMessage.NO_SUCH_CATEGORY_ID));
 
 		Category parent = null;
 		if (updateCategoryRequest.getParentCategoryId() != null) {
 			parent = categoryRepository.findById(updateCategoryRequest.getParentCategoryId())
-				.orElseThrow(() -> new NoSuchElementException("상위 카테고리의 ID가 존재하지 않는 [카테고리 ID]입니다."));
+				.orElseThrow(() -> new NoSuchElementException(ErrorMessage.NO_SUCH_PARENT_CATEGORY_ID));
 		}
 
 		List<Category> subCategories = null;
@@ -87,7 +88,7 @@ public class CategoryService {
 	@Transactional
 	public void delete(Long id, boolean withSubCategories) {
 		Category category = categoryRepository.findById(id)
-			.orElseThrow(() -> new NoSuchElementException("존재하지 않는 [카테고리 ID]입니다."));
+			.orElseThrow(() -> new NoSuchElementException(ErrorMessage.NO_SUCH_CATEGORY_ID));
 		if (!withSubCategories) {
 			category.replaceSubCategories(Collections.emptyList());
 		}

@@ -1,6 +1,7 @@
 package com.musinsa.category.dto;
 
 import com.musinsa.category.entity.Category;
+import com.musinsa.category.exception.ErrorMessage;
 import javax.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class AddCategoryRequest {
 
-	@NotBlank(message = "카테고리 한글이름(kor_name)은 필수 입력 값(공백 불가)입니다.")
+	@NotBlank(message = ErrorMessage.ILLEGAL_CATEGORY_KOR_NAME)
 	private String korName;
 
 	private String engName;

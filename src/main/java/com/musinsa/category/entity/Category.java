@@ -1,5 +1,6 @@
 package com.musinsa.category.entity;
 
+import com.musinsa.category.exception.ErrorMessage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -75,7 +76,7 @@ public class Category {
 			this.korName = korName;
 		}
 		if (engName != null && engName.trim().equals("")) {
-			throw new IllegalArgumentException("카테고리 영어이름(eng_name)은 빈 문자열(공백 불가)을 입력할 수 없습니다.(null 가능)");
+			throw new IllegalArgumentException(ErrorMessage.ILLEGAL_CATEGORY_ENG_NAME);
 		}
 		this.engName = engName;
 		if (parent != null) {
