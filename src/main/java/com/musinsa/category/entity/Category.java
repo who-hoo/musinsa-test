@@ -61,11 +61,15 @@ public class Category {
 		this.subCategories.remove(subCategory);
 	}
 
-	public void replaceSubCategories(List<Category> subCategories) {
-		//TODO: 내부 로직 성능 개선(subCategories 한번에 clear 할 수 있도록)
-		while (!this.subCategories.isEmpty()) {
-			this.removeSubCategory(this.subCategories.get(0));
+	private void removeAllSubCategories() {
+		for (Category prevSubCategory : this.subCategories) {
+			prevSubCategory.parent = null;
 		}
+		this.subCategories.clear();
+	}
+
+	public void replaceSubCategories(List<Category> subCategories) {
+		removeAllSubCategories();
 		for (Category newSubCategory : subCategories) {
 			this.addSubCategory(newSubCategory);
 		}
