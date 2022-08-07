@@ -3,6 +3,7 @@ package com.musinsa.category.config;
 import java.util.Objects;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -20,14 +21,18 @@ public class CacheConfig {
 
 	@Bean
 	public EhCacheCacheManager ehCacheCacheManager() {
+		/*
+		 * category 캐시
+		 * 최대 10000개의 객체를 저장할 수 있으며, 1시간 이상 캐시에 저장되어 있을 경우 캐시에서 제거된다.
+		 */
 		CacheConfiguration categoryCacheConfiguration = new CacheConfiguration()
 			.name("category")
 			.maxEntriesLocalHeap(10000)
 			.maxEntriesLocalDisk(1000)
-			.eternal(false) //true일 경우, timeout 관련 설정이 무시되어, element가 캐시에서 삭제되지 않음
-			.timeToIdleSeconds(0) //지정한 시간 동안 사용(조회)되지 않으면 캐시에서 제거
-			.timeToLiveSeconds(21600) //지정한 시간이 지나면 캐시에서 제거
-			.memoryStoreEvictionPolicy("LRU");
+			.eternal(false)
+			.timeToIdleSeconds(0)
+			.timeToLiveSeconds(3600)
+			.memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU);
 
 		Cache categoryCache = new Cache(categoryCacheConfiguration);
 
